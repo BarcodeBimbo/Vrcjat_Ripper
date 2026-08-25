@@ -1,7 +1,10 @@
 # VRCJAT Audio Downloader
 
-Small Node.js utility for downloading stored Opus audio frames from the VRCJAT STT API and converting each session into a WAV file.
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/a84dbec0-b4b8-48b8-a65e-c9c21ca8f44b" alt="" height="200">
+</div>
 
+Small Node.js utility for downloading stored Opus audio frames from the VRCJAT STT API and converting each session into a WAV file.
 Sessions are grouped by display name and saved under the `audio` directory.
 
 ## Output
@@ -121,4 +124,4 @@ This allows display names to be used safely as directory names on Windows.
 
 ## License
 
-Use and modify the project as needed.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/BarcodeBimbo/Vrcjat_Ripper/blob/main/LICENSE) file for details.
