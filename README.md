@@ -43,7 +43,7 @@ npm install axios opus-decoder wav
 ## Run
 
 ```bash
-node downloader.js
+node ripper.js
 ```
 
 The script will:
@@ -57,7 +57,7 @@ The script will:
 
 ## Configuration
 
-The main settings are at the top of `downloader.js`:
+The main settings are at the top of `ripper.js`:
 
 ```js
 const API_URL = 'https://stt.vrcjat.com/api';
