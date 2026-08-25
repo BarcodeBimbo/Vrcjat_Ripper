@@ -1,8 +1,10 @@
 # VRCJAT Audio Downloader
 
+
 <div align="center">
   <img src="https://github.com/user-attachments/assets/a84dbec0-b4b8-48b8-a65e-c9c21ca8f44b" alt="" height="200">
 </div>
+
 
 Small Node.js utility for downloading stored Opus audio frames from the VRCJAT STT API and converting each session into a WAV file.
 Sessions are grouped by display name and saved under the `audio` directory.
