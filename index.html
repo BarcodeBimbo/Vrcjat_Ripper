@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VRChat: Audio Ripper</title>
+  <style>
+    /* Reset and base */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #111;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* Header */
+    h1 {
+      font-weight: 400;
+      font-size: 2rem;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.25rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    h1 img {
+      height: 2rem;
+      width: auto;
+      vertical-align: middle;
+    }
+    h1 small {
+      font-size: 1rem;
+      font-weight: 300;
+      color: #888;
+      margin-left: 0.75rem;
+    }
+
+    /* Search bar */
+    .search-box {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1.5rem 0 2rem;
+      flex-wrap: wrap;
+    }
+    .search-box input {
+      flex: 1 1 300px;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 0.65rem 1rem;
+      font-size: 1rem;
+      color: #e0e0e0;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .search-box input:focus {
+      border-color: #5b7cfa;
+    }
+    .search-box input::placeholder {
+      color: #666;
+    }
+    .search-box button {
+      background: #5b7cfa;
+      border: none;
+      border-radius: 6px;
+      padding: 0.65rem 1.8rem;
+      font-weight: 500;
+      font-size: 1rem;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .search-box button:hover {
+      background: #4a6ae0;
+    }
+
+    /* Status */
+    .status {
+      margin-bottom: 1rem;
+      color: #aaa;
+      font-size: 0.95rem;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #1a1a1a;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      background: #222;
+      color: #ccc;
+      font-weight: 500;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    td {
+      padding: 0.7rem 1rem;
+      border-top: 1px solid #2a2a2a;
+      vertical-align: middle;
+    }
+    tr:hover td {
+      background: #252525;
+    }
+    code {
+      background: #2a2a2a;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      color: #ddd;
+    }
+
+    /* Download button */
+    .download-btn {
+      background: #2e9b5e;
+      border: none;
+      padding: 0.3rem 1rem;
+      border-radius: 4px;
+      color: #fff;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .download-btn:hover {
+      background: #23804d;
+    }
+    .download-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: #666;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 2rem;
+      text-align: center;
+      color: #555;
+      font-size: 0.9rem;
+    }
+    .footer code {
+      background: #222;
+      padding: 0.1rem 0.5rem;
+      border-radius: 4px;
+      color: #aaa;
+    }
+
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2a2a2a;
+      color: #e0e0e0;
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      border: 1px solid #444;
+      display: none;
+      font-size: 0.95rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>
+    <img src="https://cdn.tlo.sh/tlo/tlo-t.png" alt="VRChat: Audio Ripper" onerror="this.style.display='none'">
+    VRChat: Audio Ripper
+    <small>VRChat sessions</small>
+  </h1>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search by VRC ID or display name..." />
+    <button id="searchBtn">Search</button>
+  </div>
+
+  <div id="status" class="status">Enter a query to find sessions.</div>
+  <div id="results"></div>
+
+  
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('searchBtn');
+  const resultsDiv = document.getElementById('results');
+  const statusDiv = document.getElementById('status');
+  const toast = document.getElementById('toast');
+  let toastTimeout = null;
+
+  function showToast(msg, duration = 3000) {
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(() => { toast.style.display = 'none'; }, duration);
+  }
+
+  async function search() {
+    const q = searchInput.value.trim();
+    if (!q) {
+      resultsDiv.innerHTML = '<div class="empty">Please enter a search term.</div>';
+      statusDiv.textContent = 'Enter a query to find sessions.';
+      return;
+    }
+    statusDiv.textContent = 'Searching...';
+    resultsDiv.innerHTML = '<div class="empty">Loading…</div>';
+    try {
+      const res = await fetch(`/api/sessions?limit=200&q=${encodeURIComponent(q)}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const sessions = data.sessions || [];
+      if (!sessions.length) {
+        resultsDiv.innerHTML = '<div class="empty">No sessions found.</div>';
+        statusDiv.textContent = `No results for "${q}".`;
+        return;
+      }
+      statusDiv.textContent = `Found ${sessions.length} session${sessions.length > 1 ? 's' : ''}.`;
+      renderTable(sessions);
+    } catch (err) {
+      resultsDiv.innerHTML = '<div class="empty">Error fetching data. Check console.</div>';
+      statusDiv.textContent = 'Error: ' + err.message;
+      console.error(err);
+    }
+  }
+
+  function renderTable(sessions) {
+    let html = `<table>
+      <thead><tr>
+        <th>Session ID</th>
+        <th>Display Name</th>
+        <th>Channels</th>
+        <th>Created</th>
+        <th>Action</th>
+      </tr></thead><tbody>`;
+    for (const s of sessions) {
+      const created = s.started_at ? new Date(s.started_at).toLocaleString() : '—';
+      html += `<tr>
+        <td><code>${s.id}</code></td>
+        <td>${s.display_name || 'Unknown'}</td>
+        <td>${s.channels || 1}</td>
+        <td>${created}</td>
+        <td><button class="download-btn" data-id="${s.id}">Download</button></td>
+      </tr>`;
+    }
+    html += '</tbody></table>';
+    resultsDiv.innerHTML = html;
+
+    document.querySelectorAll('.download-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        btn.disabled = true;
+        btn.textContent = '⏳...';
+        try {
+          const res = await fetch('/download', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: id })
+          });
+          const result = await res.json();
+          if (result.result === 'success') showToast(`✅ Session ${id} downloaded successfully!`);
+          else if (result.result === 'skipped') showToast(`⏭️ Session ${id} already exists, skipped.`);
+          else showToast(`❌ Failed to download session ${id}.`);
+        } catch (err) {
+          showToast(`Error: ${err.message}`);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Download';
+        }
+      });
+    });
+  }
+
+  searchBtn.addEventListener('click', search);
+  searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+</script>
+</body>
+</html>
