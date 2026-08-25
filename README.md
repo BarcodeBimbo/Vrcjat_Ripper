@@ -127,4 +127,4 @@ This allows display names to be used safely as directory names on Windows.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/BarcodeBimbo/Vrcjat_Ripper/blob/main/LICENSE) file for details.
+This project is licensed under the GNU Public 3.0 License. See the [LICENSE](https://github.com/BarcodeBimbo/Vrcjat_Ripper/blob/main/LICENSE) file for details.
